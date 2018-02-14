@@ -48,13 +48,13 @@ namespace JIRA2VSTSSync.VSTS
 
                         //clean up string of id's
                         string ids = builder.ToString().TrimEnd(new char[] { ',' });
-
-                        HttpResponseMessage getWorkItemsHttpResponse = client.GetAsync("_apis/wit/workitems?ids=" + ids + "&fields=System.Id,System.Title,System.State,StJohnAgile.JIRAKey&asOf=" + workItemQueryResult.asOf + "&api-version=2.2").Result;
-
-                        if (getWorkItemsHttpResponse.IsSuccessStatusCode)
-                        {
-                            result = getWorkItemsHttpResponse.Content.ReadAsStringAsync().Result;
-                        }
+                        string asOf = workItemQueryResult.asOf.ToString("s");
+                        HttpResponseMessage getWorkItemsHttpResponse = 
+                            client.GetAsync("_apis/wit/workitems?ids=" + ids + 
+                            "&fields=System.Id,System.Title,System.State,StJohnAgile.JIRAKey&asOf=" +
+                            asOf + "&api-version=2.2").Result;
+                        result = getWorkItemsHttpResponse.Content.ReadAsStringAsync().Result;
+                        
                     }
                 }
             }
@@ -65,8 +65,8 @@ namespace JIRA2VSTSSync.VSTS
         public void CreateUpdateWorkItem(int id, string url, string project, string pat, string type, string title,
             string description, string jiraKey, string assignedTo, string status)
         {
-            string _personalAccessToken = pat;
-            string _credentials = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", _personalAccessToken)));
+            string personalAccessToken = pat;
+            string credentials = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", "", personalAccessToken)));
             string workItemType = "";
             string state = status;
             string reason = "Moved to state " + status;
@@ -115,7 +115,7 @@ namespace JIRA2VSTSSync.VSTS
             {
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _credentials);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
 
                 var patchValue = new StringContent(JsonConvert.SerializeObject(patchDocument), Encoding.UTF8, "application/json-patch+json");
 
