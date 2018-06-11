@@ -50,29 +50,37 @@ namespace JIRA2VSTSSync
 
             foreach (var issue in responseJson.issues)
             {
-                string key = issue.key.ToString();
-                string title = issue.fields.summary.ToString();
-                // include the JIRA key in the workitem title if it's not already there
-                title = title.Contains(key) ? title : key + " " + title;
-
-                string description = issue.fields.description.ToString();
-                string issueType = issue.fields.issuetype.name.ToString();
-                string assignedTo = issue.fields.assignee.displayName.ToString();
-                string status = issue.fields.status.statusCategory.name.ToString();
-                int id = 0;
-
-                if (keys.ContainsKey(key))
+                try
                 {
-                    id = keys.GetValueOrDefault(key);
-                }
+                    string key = issue.key.ToString();
+                    string title = issue.fields.summary.ToString();
+                    // include the JIRA key in the workitem title if it's not already there
+                    title = title.Contains(key) ? title : key + " " + title;
+
+                    string description = issue.fields.description.ToString();
+                    string issueType = issue.fields.issuetype.name.ToString();
+                    string assignedTo = issue.fields.assignee.displayName.ToString();
+                    string status = issue.fields.status.statusCategory.name.ToString();
+                    int id = 0;
+
+                    if (keys.ContainsKey(key))
+                    {
+                        id = keys.GetValueOrDefault(key);
+                    }
                 
-                Console.WriteLine("Creating/updating VSTS work item " + issueType + " for JIRA issue " + key);
-                VSTSService service = new VSTSService();
-                service.CreateUpdateWorkItem(id, vstsUrl, "ICT Solutions Delivery", vstsToken, issueType,
-                    title, description, key, assignedTo, status);             
+                    Console.WriteLine("Creating/updating VSTS work item " + issueType + " for JIRA issue " + key);
+                    VSTSService service = new VSTSService();
+                    service.CreateUpdateWorkItem(id, vstsUrl, "ICT Solutions Delivery", vstsToken, issueType,
+                        title, description, key, assignedTo, status);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("An error occurred: " + ex.Message + " - " + ex.StackTrace);
+                }
 
             }
 
+            Console.WriteLine("Press any key to continue");
             Console.ReadKey();
         }        
     }

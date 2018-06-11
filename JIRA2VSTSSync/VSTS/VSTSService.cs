@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace JIRA2VSTSSync.VSTS
-{    
+{
     public class VSTSService
     {
         public string GetWorkItemsByQuery(string url, string token, string project, string query)
@@ -87,19 +86,26 @@ namespace JIRA2VSTSSync.VSTS
 
             // Handle cases where we need to map JIRA status to VSTS state. Some modification
             // may be required here if the project uses custom states.
-            switch (status)
+            if (id == 0)
             {
-                case "In Progress":
-                    state = "Active";
-                    reason = "Implementation started";
-                    break;
-                case "Done":
-                    state = "Closed";
-                    reason = "Acceptance tests pass";
-                    break;
-                default:
-                    state = "New";
-                    break;
+                state = "New";
+            }
+            else
+            { 
+                switch (status)
+                {
+                    case "In Progress":
+                        state = "Active";
+                        reason = "Implementation started";
+                        break;
+                    case "Done":
+                        state = "Closed";
+                        reason = "Acceptance tests pass";
+                        break;
+                    default:
+                        state = "New";
+                        break;
+                }
             }
 
             Object[] patchDocument = new Object[6];
